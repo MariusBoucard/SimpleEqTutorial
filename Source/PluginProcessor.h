@@ -61,6 +61,16 @@ public:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts{*this,nullptr,"Parameters", createParameterLayout()};
 private:
+    //We re defining here a lot of aliases to avoid doing extra stuff you know :
+    using Filter =  juce::dsp::IIR::Filter<float>;
+
+//4 filter so it cans do - 48 db because each is 12; So here we re using the precedent filters to declare a chain that will create our 
+//Low cuts and high cuts filter
+    using CutFilter = juce::dsp::ProcessorChain<Filter,Filter,Filter,Filter>;
+//Lets create the moni chian we could use on every mono channel :
+  using MonoChain = juce::dsp::ProcessorChain<CutFilter,Filter,CutFilter>;
+  //To use this in stereo, we create 2 instances
+  MonoChain leftChain, rightChain; 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEqAudioProcessor)
 };
