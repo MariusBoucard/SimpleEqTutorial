@@ -204,6 +204,23 @@ juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
     return new SimpleEqAudioProcessor();
 }
 
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    ChainSettings settings;
+    //That's great because with can get values not normalized, within the previous defined range
+
+    settings.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
+    settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
+        settings.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
+    settings.lowCutSlope = apvts.getRawParameterValue("LowCut Slope")->load();
+    settings.highCutSlope = apvts.getRawParameterValue("HighCut Slope")->load();
+    settings.peakGainInDecibels = apvts.getRawParameterValue("Peak Gain")->load();
+    settings.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
+
+
+    //TODO Same for everyone
+    return settings;
+}
 //=======================
 /**
  * /3 differents kind of bands : high cut, low cut and bands
