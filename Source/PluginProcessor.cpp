@@ -115,6 +115,32 @@ void SimpleEqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
     *leftChain.get<ChainPosition::Peak>().coefficients = *peakCoefficients;
     *rightChain.get<ChainPosition::Peak>().coefficients = *peakCoefficients;
 
+
+
+    //On est parti pour faire le passe haut et passe bas :
+    //On va faire un peu le zbeul avex notre choix de ordre car il faut des ordres de 2 4 6 8 alors que notre courbe donne des resultats de 0 a 3
+   auto cutCoefficient =  juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,sampleRate,(chainSettings.lowCutSlope+1)*2);
+
+//pourquoi ici on fait une reference ??
+   auto& leftLowCut = leftChain.get<ChainPosition::LowCut>();
+
+    leftLowCut.setBypassed<0>(true);
+    leftLowCut.setBypassed<1>(true);
+    leftLowCut.setBypassed<2>(true);
+    leftLowCut.setBypassed<3>(true);
+
+    switch(chainSettings.lowCutSlope ){
+        case Slope_12 :
+        break;
+        case Slope_24 :
+        break;
+        case Slope_32 :
+        break;
+        case Slope_48 :
+        break;
+    }
+
+
 }
 
 void SimpleEqAudioProcessor::releaseResources()
@@ -234,8 +260,8 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
     settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
     settings.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
-    settings.lowCutSlope = apvts.getRawParameterValue("LowCut Slope")->load();
-    settings.highCutSlope = apvts.getRawParameterValue("HighCut Slope")->load();
+    settings.lowCutSlope = static_cast<Slope>( apvts.getRawParameterValue("LowCut Slope")->load());
+    settings.highCutSlope =static_cast<Slope>( apvts.getRawParameterValue("HighCut Slope")->load());
     settings.peakGainInDecibels = apvts.getRawParameterValue("Peak Gain")->load();
     settings.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
 
@@ -261,17 +287,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEqAudioProcessor::crea
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                         "LowCut Freq",
                                                         "LowCut Freq",
-                                                        juce::NormalisableRange<float>(20.f,20000.f,1.f,1.f),
+                                                        juce::NormalisableRange<float>(20.f,20000.f,1.f,0.25f),
                                                         20.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                         "HighCut Freq",
                                                         "HighCut Freq",
-                                                        juce::NormalisableRange<float>(20.f,20000.f,1.f,1.f),
+                                                        juce::NormalisableRange<float>(20.f,20000.f,1.f,0.25f),
                                                         20000.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                         "Peak Freq",
                                                         "Peak Freq",
-                                                        juce::NormalisableRange<float>(20.f,20000.f,1.f,1.f),
+                                                        juce::NormalisableRange<float>(20.f,20000.f,1.f,0.25f),
                                                         750.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                         "Peak Gain",
