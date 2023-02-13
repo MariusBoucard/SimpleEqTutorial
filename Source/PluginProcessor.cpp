@@ -103,6 +103,18 @@ void SimpleEqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
     spec.sampleRate = sampleRate;
     leftChain.prepare(spec);
     rightChain.prepare(spec);
+
+//Si j ai bien compris en gros ca fait une copie du bail ???
+    auto chainSettings = getChainSettings(apvts);
+    //On crée le filtre avec tous les bons coefficients qu'on veut attention au gain
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate,
+                                                        chainSettings.peakFreq
+                                                        ,chainSettings.peakQuality,
+                                                        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    //Be carefull with the dereference as it s put on the heap 
+    *leftChain.get<ChainPosition::Peak>().coefficients = *peakCoefficients;
+    *rightChain.get<ChainPosition::Peak>().coefficients = *peakCoefficients;
+
 }
 
 void SimpleEqAudioProcessor::releaseResources()
@@ -150,6 +162,16 @@ void SimpleEqAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
+
+     auto chainSettings = getChainSettings(apvts);
+    //On crée le filtre avec tous les bons coefficients qu'on veut attention au gain
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(),
+                                                        chainSettings.peakFreq
+                                                        ,chainSettings.peakQuality,
+                                                        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    //Be carefull with the dereference as it s put on the heap 
+    *leftChain.get<ChainPosition::Peak>().coefficients = *peakCoefficients;
+    *rightChain.get<ChainPosition::Peak>().coefficients = *peakCoefficients;
 
     //Here we create another instance of audioBlock to compute on it
    juce::dsp::AudioBlock<float> block(buffer);
@@ -211,14 +233,13 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 
     settings.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
     settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
-        settings.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
+    settings.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
     settings.lowCutSlope = apvts.getRawParameterValue("LowCut Slope")->load();
     settings.highCutSlope = apvts.getRawParameterValue("HighCut Slope")->load();
     settings.peakGainInDecibels = apvts.getRawParameterValue("Peak Gain")->load();
     settings.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
 
 
-    //TODO Same for everyone
     return settings;
 }
 //=======================

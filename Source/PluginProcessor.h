@@ -82,6 +82,12 @@ private:
   using MonoChain = juce::dsp::ProcessorChain<CutFilter,Filter,CutFilter>;
   //To use this in stereo, we create 2 instances
   MonoChain leftChain, rightChain; 
+  //Be carefull with the order as this this will be used to access the peak in the chain
+  enum ChainPosition { 
+    LowCut,
+    Peak,
+    HighCut
+  };
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEqAudioProcessor)
 };
