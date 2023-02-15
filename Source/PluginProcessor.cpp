@@ -139,6 +139,7 @@ void SimpleEqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
 
 //pourquoi ici on fait une reference ??
    auto& leftHighCut = leftChain.get<ChainPosition::HighCut>();
+
     updateCutFilter(leftHighCut,highCutCoefficient,chainSettings.highCutSlope);
 
 
@@ -209,7 +210,16 @@ void SimpleEqAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce
 
     auto& rightLowCut = rightChain.get<ChainPosition::LowCut>();
      updateCutFilter(rightLowCut,cutCoefficient,chainSettings.lowCutSlope);
+         auto highCutCoefficient =  juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.highCutFreq,getSampleRate(),(chainSettings.highCutSlope+1)*2);
 
+ auto& leftHighCut = leftChain.get<ChainPosition::HighCut>();
+
+    updateCutFilter(leftHighCut,highCutCoefficient,chainSettings.highCutSlope);
+
+
+
+    auto& rightHighCut = rightChain.get<ChainPosition::HighCut>();
+    updateCutFilter(rightHighCut,highCutCoefficient,chainSettings.highCutSlope);
 
     //Here we create another instance of audioBlock to compute on it
    juce::dsp::AudioBlock<float> block(buffer);
