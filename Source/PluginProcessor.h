@@ -102,6 +102,64 @@ private:
 
   //Static method to avoid over us of the memory
   static void updateCoefficients(Coefficients& old,const Coefficients& replacement);
+
+  //Damn here we go for the template function so it can be use wether by the low cut or the high cut
+  template<typename ChainType, typename CoefficientType>
+  void updateCutFilter(ChainType& leftLowCut, 
+                        const CoefficientType& cutCoefficient,
+                        const ChainSettings chainSettings){
+                         // auto cutCoefficient =  juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,getSampleRate(),(chainSettings.lowCutSlope+1)*2);
+
+//pourquoi ici on fait une reference ??
+  //  auto& leftLowCut = leftChain.get<ChainPosition::LowCut>();
+
+    leftLowCut.setBypassed<0>(true);
+    leftLowCut.setBypassed<1>(true);
+    leftLowCut.setBypassed<2>(true);
+    leftLowCut.setBypassed<3>(true);
+
+    switch(chainSettings.lowCutSlope ){
+        case Slope_12 :
+        {
+            *leftLowCut.get<0>().coefficients = *cutCoefficient[0];
+            leftLowCut.setBypassed<0>(false);
+            break;
+        }
+        case Slope_24 :
+        {
+            *leftLowCut.get<0>().coefficients = *cutCoefficient[0];
+            leftLowCut.setBypassed<0>(false);
+             *leftLowCut.get<1>().coefficients = *cutCoefficient[1];
+            leftLowCut.setBypassed<1>(false);
+            break;
+        }
+        break;
+        case Slope_32 :
+        {
+             *leftLowCut.get<0>().coefficients = *cutCoefficient[0];
+            leftLowCut.setBypassed<0>(false);
+             *leftLowCut.get<1>().coefficients = *cutCoefficient[1];
+            leftLowCut.setBypassed<1>(false);
+            *leftLowCut.get<2>().coefficients = *cutCoefficient[2];
+            leftLowCut.setBypassed<2>(false);
+            break;
+        }
+        break;
+        case Slope_48 :
+        {
+                *leftLowCut.get<0>().coefficients = *cutCoefficient[0];
+            leftLowCut.setBypassed<0>(false);
+             *leftLowCut.get<1>().coefficients = *cutCoefficient[1];
+            leftLowCut.setBypassed<1>(false);
+            *leftLowCut.get<2>().coefficients = *cutCoefficient[2];
+            leftLowCut.setBypassed<2>(false);
+            *leftLowCut.get<3>().coefficients = *cutCoefficient[3];
+            leftLowCut.setBypassed<3>(false);
+            break;
+        }
+        break;
+    }
+                        }
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEqAudioProcessor)
 };
