@@ -121,17 +121,30 @@ void SimpleEqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
 
     //On est parti pour faire le passe haut et passe bas :
     //On va faire un peu le zbeul avex notre choix de ordre car il faut des ordres de 2 4 6 8 alors que notre courbe donne des resultats de 0 a 3
-   auto cutCoefficient =  juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,sampleRate,(chainSettings.lowCutSlope+1)*2);
+   auto lowCutCoefficient =  juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,sampleRate,(chainSettings.lowCutSlope+1)*2);
 
 //pourquoi ici on fait une reference ??
    auto& leftLowCut = leftChain.get<ChainPosition::LowCut>();
-    updateCutFilter(leftLowCut,cutCoefficient,chainSettings.lowCutSlope);
+    updateCutFilter(leftLowCut,lowCutCoefficient,chainSettings.lowCutSlope);
 
 
 
     auto& rightLowCut = rightChain.get<ChainPosition::LowCut>();
-    updateCutFilter(rightLowCut,cutCoefficient,chainSettings.lowCutSlope);
+    updateCutFilter(rightLowCut,lowCutCoefficient,chainSettings.lowCutSlope);
 
+
+    //On est parti pour faire le passe haut et passe bas :
+    //On va faire un peu le zbeul avex notre choix de ordre car il faut des ordres de 2 4 6 8 alors que notre courbe donne des resultats de 0 a 3
+   auto highCutCoefficient =  juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.highCutFreq,sampleRate,(chainSettings.highCutSlope+1)*2);
+
+//pourquoi ici on fait une reference ??
+   auto& leftHighCut = leftChain.get<ChainPosition::HighCut>();
+    updateCutFilter(leftHighCut,highCutCoefficient,chainSettings.highCutSlope);
+
+
+
+    auto& rightHighCut = rightChain.get<ChainPosition::HighCut>();
+    updateCutFilter(rightHighCut,highCutCoefficient,chainSettings.highCutSlope);
 
 }
 
