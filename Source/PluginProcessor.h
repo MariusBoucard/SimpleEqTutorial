@@ -107,12 +107,8 @@ private:
   template<typename ChainType, typename CoefficientType>
   void updateCutFilter(ChainType& leftLowCut, 
                         const CoefficientType& cutCoefficient,
-                       // const ChainSettings chainSettings,
                         const Slope& lowCutSlope){
-                         // auto cutCoefficient =  juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,getSampleRate(),(chainSettings.lowCutSlope+1)*2);
 
-//pourquoi ici on fait une reference ??
-  //  auto& leftLowCut = leftChain.get<ChainPosition::LowCut>();
 
     leftLowCut.setBypassed<0>(true);
     leftLowCut.setBypassed<1>(true);
