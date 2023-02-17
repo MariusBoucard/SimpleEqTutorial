@@ -28,6 +28,20 @@ struct ChainSettings
   float lowCutFreq{0}, highCutFreq{20000};
   Slope lowCutSlope{Slope::Slope_12}, highCutSlope{Slope::Slope_12};
 };
+  enum ChainPosition
+  {
+    LowCut,
+    Peak,
+    HighCut
+  };
+ // We re defining here a lot of aliases to avoid doing extra stuff you know :
+  using Filter = juce::dsp::IIR::Filter<float>;
+
+  // 4 filter so it cans do - 48 db because each is 12; So here we re using the precedent filters to declare a chain that will create our
+  // Low cuts and high cuts filter
+  using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
+  // Lets create the moni chian we could use on every mono channel :
+  using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState &apvts);
 //==============================================================================
 /**
@@ -82,23 +96,11 @@ public:
   juce::AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters", createParameterLayout()};
 
 private:
-  // We re defining here a lot of aliases to avoid doing extra stuff you know :
-  using Filter = juce::dsp::IIR::Filter<float>;
-
-  // 4 filter so it cans do - 48 db because each is 12; So here we re using the precedent filters to declare a chain that will create our
-  // Low cuts and high cuts filter
-  using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
-  // Lets create the moni chian we could use on every mono channel :
-  using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
+ 
   // To use this in stereo, we create 2 instances
   MonoChain leftChain, rightChain;
   // Be carefull with the order as this this will be used to access the peak in the chain
-  enum ChainPosition
-  {
-    LowCut,
-    Peak,
-    HighCut
-  };
+
 
   void updatePeakFilter(const ChainSettings &ChainSettings);
   // We declare an aliase on the coefficient to change them more easily
