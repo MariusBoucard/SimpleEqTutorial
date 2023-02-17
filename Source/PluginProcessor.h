@@ -34,8 +34,14 @@ struct ChainSettings
     Peak,
     HighCut
   };
- // We re defining here a lot of aliases to avoid doing extra stuff you know :
   using Filter = juce::dsp::IIR::Filter<float>;
+
+  using Coefficients = Filter::CoefficientsPtr;
+
+  // Static method to avoid over us of the memory
+  void updateCoefficients(Coefficients &old, const Coefficients &replacement);
+  Coefficients makePeakFilter(const ChainSettings& chainSettings,double sampleRate);
+ // We re defining here a lot of aliases to avoid doing extra stuff you know :
 
   // 4 filter so it cans do - 48 db because each is 12; So here we re using the precedent filters to declare a chain that will create our
   // Low cuts and high cuts filter
@@ -104,10 +110,7 @@ private:
 
   void updatePeakFilter(const ChainSettings &ChainSettings);
   // We declare an aliase on the coefficient to change them more easily
-  using Coefficients = Filter::CoefficientsPtr;
-
-  // Static method to avoid over us of the memory
-  static void updateCoefficients(Coefficients &old, const Coefficients &replacement);
+  
   template <int Index, typename ChainType, typename CoefficientType>
   void update(ChainType &chain, const CoefficientType &coefficient)
   {
