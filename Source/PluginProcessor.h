@@ -42,7 +42,45 @@ struct ChainSettings
   void updateCoefficients(Coefficients &old, const Coefficients &replacement);
   Coefficients makePeakFilter(const ChainSettings& chainSettings,double sampleRate);
  // We re defining here a lot of aliases to avoid doing extra stuff you know :
+ template <int Index, typename ChainType, typename CoefficientType>
+  void update(ChainType &chain, const CoefficientType &coefficient)
+  {
+    updateCoefficients(chain.get<Index>().coefficients, coefficient[Index]);
+    chain.setBypassed<Index>(false);
+  }
+  // Damn here we go for the template function so it can be use wether by the low cut or the high cut
+  template <typename ChainType, typename CoefficientType>
+  void updateCutFilter(ChainType &leftLowCut,
+                       const CoefficientType &cutCoefficient,
+                       const Slope &lowCutSlope)
+  {
 
+    leftLowCut.setBypassed<0>(true);
+    leftLowCut.setBypassed<1>(true);
+    leftLowCut.setBypassed<2>(true);
+    leftLowCut.setBypassed<3>(true);
+    // Petit trick de faire a l envers oiur pas generer plus de code que pévu
+    switch (lowCutSlope)
+    {
+    case Slope_48:
+    {
+      update<3>(leftLowCut, cutCoefficient);
+    }
+    case Slope_32:
+    {
+      update<2>(leftLowCut, cutCoefficient);
+    }
+    // break;
+    case Slope_24:
+    {
+      update<1>(leftLowCut, cutCoefficient);
+    }
+    case Slope_12:
+    {
+      update<0>(leftLowCut, cutCoefficient);
+    }
+    }
+  }
   // 4 filter so it cans do - 48 db because each is 12; So here we re using the precedent filters to declare a chain that will create our
   // Low cuts and high cuts filter
   using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
@@ -111,45 +149,7 @@ private:
   void updatePeakFilter(const ChainSettings &ChainSettings);
   // We declare an aliase on the coefficient to change them more easily
   
-  template <int Index, typename ChainType, typename CoefficientType>
-  void update(ChainType &chain, const CoefficientType &coefficient)
-  {
-    updateCoefficients(chain.get<Index>().coefficients, coefficient[Index]);
-    chain.setBypassed<Index>(false);
-  }
-  // Damn here we go for the template function so it can be use wether by the low cut or the high cut
-  template <typename ChainType, typename CoefficientType>
-  void updateCutFilter(ChainType &leftLowCut,
-                       const CoefficientType &cutCoefficient,
-                       const Slope &lowCutSlope)
-  {
-
-    leftLowCut.setBypassed<0>(true);
-    leftLowCut.setBypassed<1>(true);
-    leftLowCut.setBypassed<2>(true);
-    leftLowCut.setBypassed<3>(true);
-    // Petit trick de faire a l envers oiur pas generer plus de code que pévu
-    switch (lowCutSlope)
-    {
-    case Slope_48:
-    {
-      update<3>(leftLowCut, cutCoefficient);
-    }
-    case Slope_32:
-    {
-      update<2>(leftLowCut, cutCoefficient);
-    }
-    // break;
-    case Slope_24:
-    {
-      update<1>(leftLowCut, cutCoefficient);
-    }
-    case Slope_12:
-    {
-      update<0>(leftLowCut, cutCoefficient);
-    }
-    }
-  }
+ 
 
   //More refactor :
   void updateLowCutFilters(const ChainSettings& chainSettings);
