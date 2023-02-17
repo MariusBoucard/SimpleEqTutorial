@@ -50,6 +50,15 @@ private:
     //Okay we're gonna put them all in a slider so we can iterate over them :
     std::vector<juce::Component*> getComps();
 
-
+    //Set some aliases to avoid having to type real meaning of apvts :
+    using APVTS = juce::AudioProcessorValueTreeState;
+    using Attachement = APVTS::SliderAttachment;
+    Attachement peakFreqSliderAttachement,
+    peakGainSliderAttachement,
+    peakQualitySliderAttachement,
+    lowCutFreqSliderAttachement,
+    highCutFreqSliderAttachement,
+    lowCutSlopeSliderAttachement,
+    highCutSlopeSliderAttachement;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEqAudioProcessorEditor)
 };
