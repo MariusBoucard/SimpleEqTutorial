@@ -81,6 +81,18 @@ struct ChainSettings
     }
     }
   }
+
+
+  inline auto makeLowCutFilter(const ChainSettings& chainSettings,double sampleRate)
+  {
+    return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,sampleRate,(chainSettings.lowCutSlope+1)*2);
+  }
+
+  inline auto makeHighCutFilter(const ChainSettings& chainSettings,double sampleRate)
+  {
+        return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq,sampleRate,(chainSettings.highCutSlope+1)*2);
+
+  }
   // 4 filter so it cans do - 48 db because each is 12; So here we re using the precedent filters to declare a chain that will create our
   // Low cuts and high cuts filter
   using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
