@@ -121,7 +121,16 @@ mags[i]=Decibels::gainToDecibels(mag);
 
 //==============================================================================
 SimpleEqAudioProcessorEditor::SimpleEqAudioProcessorEditor(SimpleEqAudioProcessor &p)
-    : AudioProcessorEditor(&p), audioProcessor(p),      responseCurveComponent(audioProcessor),
+    : AudioProcessorEditor(&p), audioProcessor(p),
+    
+        peakFreqSlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
+        peakGainSlider(*audioProcessor.apvts.getParameter("Peak Gain"), "dB"),
+      peakQualitySlider(*audioProcessor.apvts.getParameter("Peak Quality"), "Q"),
+      highCutFreqSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
+      highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/oct"),
+      lowCutFreqSlider(*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"),
+      lowCutSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/oct"),
+          responseCurveComponent(audioProcessor),
       peakFreqSliderAttachement(audioProcessor.apvts, "Peak Freq", peakFreqSlider),
       peakGainSliderAttachement(audioProcessor.apvts, "Peak Gain", peakGainSlider),
       peakQualitySliderAttachement(audioProcessor.apvts, "Peak Quality", peakQualitySlider),

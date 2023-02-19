@@ -13,12 +13,33 @@
 //=====================================
 // Custom to create our sliders in the same way and not have to redo every thing again
 
-struct CustomRotatorySlider : juce::Slider
+struct LookAndFeel : juce::LookAndFeel_V4
 {
-  CustomRotatorySlider() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
-                                        juce::Slider::TextEntryBoxPosition::NoTextBox)
-  {
+  void drawRotarySlider (juce::Graphics&, int x, int y, int width,int height,float sliderPosProportional,float rotaryStartAngle,
+  float rotaryEndAngle, juce::Slider&) override { }
+};
+struct RotarySliderWithLabels : juce::Slider
+{
+  RotarySliderWithLabels(juce::RangedAudioParameter& rap,const juce::String& unitsuffix) : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
+                                        juce::Slider::TextEntryBoxPosition::NoTextBox),
+                                param(&rap),
+                                suffix(unitsuffix)
+  { 
+    setLookAndFeel(&lnf);
   }
+
+  ~RotarySliderWithLabels()
+  {
+    setLookAndFeel(nullptr);
+  }
+  void paint (juce::Graphics& g) override  { };
+  juce::Rectangle<int> getSliderBounds() const;
+  int getTextHeight() const { return 14;}
+  juce::String getDisplayString() const;
+  private:
+  LookAndFeel lnf;
+  juce::RangedAudioParameter* param;
+  juce::String suffix;
 };
 
 struct ResponseCurveComponent : juce::Component,
@@ -56,7 +77,7 @@ private:
   // This reference is provided as a quick way for your editor to
   // access the processor object that created it.
   SimpleEqAudioProcessor &audioProcessor;
-  CustomRotatorySlider peakFreqSlider,
+  RotarySliderWithLabels peakFreqSlider,
       peakGainSlider,
       peakQualitySlider,
       lowCutFreqSlider,
