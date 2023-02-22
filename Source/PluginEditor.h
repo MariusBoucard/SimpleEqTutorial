@@ -15,24 +15,23 @@
 
 struct LookAndFeel : juce::LookAndFeel_V4
 {
-  void drawRotarySlider(juce::Graphics&,
-   int x,
-    int y,
-     int width,
-     int height,
-     float sliderPosProportional,
-     float rotaryStartAngle,
-  float rotaryEndAngle,
-   juce::Slider&) override ;
+  void drawRotarySlider(juce::Graphics &,
+                        int x,
+                        int y,
+                        int width,
+                        int height,
+                        float sliderPosProportional,
+                        float rotaryStartAngle,
+                        float rotaryEndAngle,
+                        juce::Slider &) override;
 };
 struct RotarySliderWithLabels : juce::Slider
 {
-  RotarySliderWithLabels(juce::RangedAudioParameter& rap,const juce::String& unitsuffix) :
-   juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
-                                        juce::Slider::TextEntryBoxPosition::NoTextBox),
-                                param(&rap),
-                                suffix(unitsuffix)
-  { 
+  RotarySliderWithLabels(juce::RangedAudioParameter &rap, const juce::String &unitsuffix) : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
+                                                                                                         juce::Slider::TextEntryBoxPosition::NoTextBox),
+                                                                                            param(&rap),
+                                                                                            suffix(unitsuffix)
+  {
     setLookAndFeel(&lnf);
   }
 
@@ -40,19 +39,21 @@ struct RotarySliderWithLabels : juce::Slider
   {
     setLookAndFeel(nullptr);
   }
-  struct LabelPos{
+  struct LabelPos
+  {
     float pos;
     juce::String label;
   };
   juce::Array<LabelPos> labels;
 
-  void paint(juce::Graphics& g) override ;
+  void paint(juce::Graphics &g) override;
   juce::Rectangle<int> getSliderBounds() const;
-  int getTextHeight() const { return 14;}
+  int getTextHeight() const { return 14; }
   juce::String getDisplayString() const;
-  private:
+
+private:
   LookAndFeel lnf;
-  juce::RangedAudioParameter* param;
+  juce::RangedAudioParameter *param;
   juce::String suffix;
 };
 
@@ -66,13 +67,16 @@ struct ResponseCurveComponent : juce::Component,
 
   void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override {}
   void timerCallback() override;
-  void paint(juce::Graphics& g) override;
-    void updateChain();
-
-  private:
-    juce::Atomic<bool> parametersChanged{false};
+  void paint(juce::Graphics &g) override;
+  void updateChain();
+  void resized() override;
+private:
+  juce::Atomic<bool> parametersChanged{false};
   MonoChain monoChain;
-  SimpleEqAudioProcessor& audioProcessor;
+  SimpleEqAudioProcessor &audioProcessor;
+  juce::Image background;
+  juce::Rectangle<int> getRenderArea();
+  juce::Rectangle<int> getAnalysisArea();
 };
 
 //==============================================================================
@@ -87,7 +91,6 @@ public:
   //==============================================================================
   void paint(juce::Graphics &) override;
   void resized() override;
-  
 
 private:
   // This reference is provided as a quick way for your editor to
@@ -114,7 +117,6 @@ private:
       highCutFreqSliderAttachement,
       lowCutSlopeSliderAttachement,
       highCutSlopeSliderAttachement;
-
 
   ResponseCurveComponent responseCurveComponent;
   // MonoChain monoChain;

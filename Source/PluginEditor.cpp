@@ -192,7 +192,8 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
   // (Our component is opaque, so we must completely fill the background with a solid colour)
   // g.fillAll(Colours::black);
 
-  auto responseArea = getLocalBounds();
+  g.drawImage(background, getLocalBounds().toFloat());
+  auto responseArea = getRenderArea();
   auto w = responseArea.getWidth();
   auto &lowcut = monoChain.get<ChainPosition::LowCut>();
   auto &peak = monoChain.get<ChainPosition::Peak>();
@@ -254,6 +255,51 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
 
   g.strokePath(responseCurve, PathStrokeType(2.f));
 }
+
+void ResponseCurveComponent::resized()
+{
+   using namespace juce;
+   background = Image(Image::PixelFormat::RGB, getWidth(),getHeight(),true);
+   Graphics g(background);
+   Array<float> freqs{
+20, 30, 40, 50, 100,
+200, 300, 400, 500, 1000,
+2000, 3000, 4000, 5000, 10000,20000
+
+   };
+
+   g.setColour(Colours::white);
+   for(auto f : freqs){
+    auto normX = mapFromLog10(f,20.f,20000.f);
+    // g.drawVerticalLine(getWidth()*normX,0.f,getHeight());
+   }
+
+   Array<float> gain{
+    -24,-12,0,12,24
+   };
+   for(auto db : gain){
+       auto y = jmap(db,-24.f,24.f,float(getHeight()),0.f);
+    // g.drawHorizontalLine(y,0,getWidth());
+   }
+   g.drawRect(getRenderArea());
+}
+
+juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
+{
+  auto bounds = getLocalBounds();
+  //One instance of live constant per line attention
+  // bounds.reduce(10,
+  // 8);
+  bounds.removeFromTop(12);
+  bounds.removeFromBottom(2);
+  bounds.removeFromLeft(20);
+    bounds.removeFromRight(20);
+
+  return bounds;
+}
+  juce::Rectangle<int> ResponseCurveComponent::getAnalysisArea(){
+
+  }
 
 //==============================================================================
 SimpleEqAudioProcessorEditor::SimpleEqAudioProcessorEditor(SimpleEqAudioProcessor &p)
