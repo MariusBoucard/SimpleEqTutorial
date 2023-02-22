@@ -271,9 +271,26 @@ SimpleEqAudioProcessorEditor::SimpleEqAudioProcessorEditor(SimpleEqAudioProcesso
       lowCutSlopeSliderAttachement(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider)
 {
   //Add min and max for sliders :
-  peakFreqSlider.labels.add({0.f, "20hz"});
-  peakFreqSlider.labels.add({1.f, "20Khz"});
+  peakFreqSlider.labels.add({0.f, "20 hz"});
+  peakFreqSlider.labels.add({1.f, "20 Khz"});
 
+  lowCutFreqSlider.labels.add({0.f, "20 hz"});
+  lowCutFreqSlider.labels.add({1.f, "20 Khz"});
+
+  highCutFreqSlider.labels.add({0.f, "20 hz"});
+  highCutFreqSlider.labels.add({1.f, "20 Khz"});
+
+  peakGainSlider.labels.add({0.f, "-24 dB"});
+  peakGainSlider.labels.add({1.f, "24 dB"});
+
+  peakQualitySlider.labels.add({0.f, "0.1 Q"});
+  peakQualitySlider.labels.add({1.f, "1 Q"});
+
+  lowCutSlopeSlider.labels.add({0.f,"12 dB/oct"});
+  lowCutSlopeSlider.labels.add({1.f,"48 dB/oct"});
+
+  highCutSlopeSlider.labels.add({0.f,"12 dB/oct"});
+  highCutSlopeSlider.labels.add({1.f,"48 dB/oct"});
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
   for (auto comp : getComps())
@@ -293,7 +310,7 @@ void SimpleEqAudioProcessorEditor::paint(juce::Graphics &g)
 {
   using namespace juce;
   // (Our component is opaque, so we must completely fill the background with a solid colour)
-  //  g.fillAll(Colours::black);
+  g.fillAll(Colours::black);
 }
 
 void SimpleEqAudioProcessorEditor::resized()
