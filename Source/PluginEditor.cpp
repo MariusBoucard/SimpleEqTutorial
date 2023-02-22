@@ -6,7 +6,6 @@
   ==============================================================================
 */
 
-
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 //=================================================================================
@@ -20,29 +19,43 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g,
                                    float rotaryEndAngle,
                                    juce::Slider &slider)
 {
- using namespace juce;
-   auto bounds = Rectangle<float>(x, y, width, height);
-  g.setColour(Colour(97u, 18u, 167u)); 
-   g.fillEllipse(bounds);
-g.setColour(Colour(255u, 154u, 1u));
-   g.drawEllipse(bounds, 1.f);
+  using namespace juce;
+  auto bounds = Rectangle<float>(x, y, width, height);
+  g.setColour(Colour(97u, 18u, 167u));
+  g.fillEllipse(bounds);
+  g.setColour(Colour(255u, 154u, 1u));
+  g.drawEllipse(bounds, 1.f);
 
+//Ok we have to cast here to make sure we can use the inner function
+  if( auto* rswl =dynamic_cast<RotarySliderWithLabels*>(&slider) ){
   auto center = bounds.getCentre();
   // To rotate the thing, we define it in a path
   Path p;
   Rectangle<float> r;
-  r.setLeft(center.getX()-2);
-  r.setRight(center.getX()+2);
+  r.setLeft(center.getX() - 2);
+  r.setRight(center.getX() + 2);
   r.setTop(bounds.getY());
-  r.setBottom(center.getY());
-  p.addRectangle(r);
+  r.setBottom(center.getY() - rswl->getTextHeight()*2);
+  p.addRoundedRectangle(r,2.f);
 
-  jassert(rotaryEndAngle>rotaryStartAngle);
+  jassert(rotaryEndAngle > rotaryStartAngle);
 
-  auto sliderAngRad = jmap(SliderPosProportional,0.f,1.f,rotaryStartAngle,rotaryEndAngle);
-  p.applyTransform(AffineTransform().rotated(sliderAngRad,center.getX(),center.getY()));
+  auto sliderAngRad = jmap(SliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
+  p.applyTransform(AffineTransform().rotated(sliderAngRad, center.getX(), center.getY()));
   g.fillPath(p);
- }
+  g.setFont(rswl->getTextHeight());
+  auto text = rswl->getDisplayString();
+  auto strWidth = g.getCurrentFont().getStringWidth(text);
+  r.setSize(strWidth+4,rswl->getTextHeight()+2);
+  r.setCentre(bounds.getCentre());
+  g.setColour(Colours::black);
+  g.fillRect(r);
+  g.setColour(Colours::white);
+  g.drawFittedText(text,r.toNearestInt(),juce::Justification::centred,1);
+
+  }
+
+}
 void RotarySliderWithLabels::paint(juce::Graphics &g)
 {
   using namespace juce;
@@ -56,23 +69,28 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
   g.drawRect(sliderBounds);
 
   getLookAndFeel().drawRotarySlider(g,
-                                     sliderBounds.getX(),
-                                      sliderBounds.getY(),
-                                       sliderBounds.getWidth(), 
-                                       sliderBounds.getHeight(),
+                                    sliderBounds.getX(),
+                                    sliderBounds.getY(),
+                                    sliderBounds.getWidth(),
+                                    sliderBounds.getHeight(),
                                     jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0), startAng, endAng, *this);
   // Jmap permet de normaliser notre valeur entre 0 et 1 important car tous les sliders les memes
 }
 juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
 {
   auto bounds = getLocalBounds();
-  auto size = juce::jmin(bounds.getWidth(),bounds.getHeight());
-  size -= getTextHeight()*2;
+  auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
+  size -= getTextHeight() * 2;
   juce::Rectangle<int> r;
-  r.setSize(size,size);
-  r.setCentre(bounds.getCentreX(),0);
+  r.setSize(size, size);
+  r.setCentre(bounds.getCentreX(), 0);
   r.setY(2);
   return r;
+}
+
+juce::String RotarySliderWithLabels::getDisplayString() const
+{
+  return juce::String(getValue());
 }
 //=================================================================================
 ResponseCurveComponent::ResponseCurveComponent(SimpleEqAudioProcessor &p) : audioProcessor(p)
@@ -121,7 +139,7 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
 {
   using namespace juce;
   // (Our component is opaque, so we must completely fill the background with a solid colour)
- // g.fillAll(Colours::black);
+  // g.fillAll(Colours::black);
 
   auto responseArea = getLocalBounds();
   auto w = responseArea.getWidth();
@@ -225,7 +243,7 @@ void SimpleEqAudioProcessorEditor::paint(juce::Graphics &g)
 {
   using namespace juce;
   // (Our component is opaque, so we must completely fill the background with a solid colour)
-//  g.fillAll(Colours::black);
+  //  g.fillAll(Colours::black);
 }
 
 void SimpleEqAudioProcessorEditor::resized()
@@ -237,7 +255,7 @@ void SimpleEqAudioProcessorEditor::resized()
   // on enleve un tier pour pouvoir afficher la reponse dedans
   auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
   auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
-  
+
   // on fait la moiter de ce qu'il reste tavu pas 1:3 du total
   auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
   responseCurveComponent.setBounds(responseArea);
