@@ -74,6 +74,29 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
                                     sliderBounds.getWidth(),
                                     sliderBounds.getHeight(),
                                     jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0), startAng, endAng, *this);
+
+  
+  auto center = sliderBounds.toFloat().getCentre();
+  auto radius = sliderBounds.getWidth()*0.5f;
+  g.setColour(Colour(0u,172u,1u));
+  g.setFont(getTextHeight());
+  auto numChoices = labels.size();
+  for(int i =0;i<numChoices ; i++){
+    auto pos = labels[i].pos;
+    jassert(0.f<=pos);
+    jassert(pos<=1.f);
+    auto ang = jmap(pos,0.f,1.f,startAng,endAng);
+    auto c = center.getPointOnCircumference(radius+getTextHeight()*0.5f+1  ,ang);
+    Rectangle<float> r;
+    auto str = labels[i].label;
+    r.setSize(g.getCurrentFont().getStringWidth(str),getTextHeight());
+    r.setCentre(c);
+    r.setY(r.getY()+getTextHeight());
+    g.drawFittedText(str,r.toNearestInt(),juce::Justification::centred,1); 
+
+
+
+  }
   // Jmap permet de normaliser notre valeur entre 0 et 1 important car tous les sliders les memes
 }
 juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
@@ -247,6 +270,10 @@ SimpleEqAudioProcessorEditor::SimpleEqAudioProcessorEditor(SimpleEqAudioProcesso
       lowCutFreqSliderAttachement(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
       lowCutSlopeSliderAttachement(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider)
 {
+  //Add min and max for sliders :
+  peakFreqSlider.labels.add({0.f, "20hz"});
+  peakFreqSlider.labels.add({1.f, "20Khz"});
+
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
   for (auto comp : getComps())
