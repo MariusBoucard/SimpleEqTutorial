@@ -350,6 +350,14 @@ void ResponseCurveComponent::resized()
     g.setColour(db == 0.f ? Colours::purple : Colours::lightgrey );
     g.drawFittedText(str,r,juce::Justification::centred,1);
 
+    str.clear();
+    str << (db -24.f);
+    auto textWidth = g.getCurrentFont().getStringWidth(str);
+    r.setX(1);
+        r.setSize(textWidth, fontHeight);
+    g.setColour(Colours::lightgrey);
+    g.drawFittedText(str,r,juce::Justification::centred,1);
+
   }
 }
 
