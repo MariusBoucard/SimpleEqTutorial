@@ -8,6 +8,8 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+
+
 //=================================================================================
 void LookAndFeel::drawRotarySlider(juce::Graphics &g,
                                    int x,
@@ -141,13 +143,17 @@ juce::String RotarySliderWithLabels::getDisplayString() const
   return str;
 }
 //=================================================================================
-ResponseCurveComponent::ResponseCurveComponent(SimpleEqAudioProcessor &p) : audioProcessor(p)
+ResponseCurveComponent::ResponseCurveComponent(SimpleEqAudioProcessor &p) : audioProcessor(p),
+leftChannelFifo(&audioProcessor.leftChannelFifo)
 {
   const auto &params = audioProcessor.getParameters();
   for (auto param : params)
   {
     param->addListener(this);
   }
+
+  leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+  monoBuffer.setSize(1,leftChannelFFTDataGenerator.getFFTSize());
   updateChain();
   // dont forget it otherwise s actiove pas
   startTimerHz(60);
@@ -168,13 +174,69 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
 
 void ResponseCurveComponent::timerCallback()
 {
+  //FFT START HERE SEEMS HARDDDD
+  juce::AudioBuffer<float> tempIncomingBuffer;
+
+
+  while(leftChannelFifo->getNumCompleteBuffersAvailable() >0 ){
+      if(leftChannelFifo->getAudioBuffer(tempIncomingBuffer))
+      {
+          auto size = tempIncomingBuffer.getNumSamples();
+          //On commence a ecrire dans monobuffer en 0, on copy ce qu'il y a depuis size, puis on copie tout le reste - size car on va pas plus loin
+          juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0,0),
+                                            monoBuffer.getReadPointer(0,size),
+                                            monoBuffer.getNumSamples()-size);
+
+          //Puis on colle a la fin de notre monoBuffer ce qui vient du tempIncomingBUffer
+          juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0,monoBuffer.getNumSamples()-size),
+                                            tempIncomingBuffer.getReadPointer(0,0),
+                                            size);
+
+          leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer,-48.f);
+
+
+          
+      }
+
+  }
+
+  /**
+   *  if there are FFt data to pull
+   * if we can pull a buffer then generate a path
+  */
+ const auto fftBounds = getAnalysisArea().toFloat();
+ const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
+
+/*
+48000/2048 = 23 hz : this is the binwidth
+*/
+ const auto binWidth = audioProcessor.getSampleRate()/ (double) fftSize;
+
+ while(leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks()>0){
+  std::vector<float> fftData;
+  if(leftChannelFFTDataGenerator.getFFTData(fftData))
+  {
+    pathProducer.generatePath(fftData,fftBounds,fftSize,binWidth,-48.f);
+  }
+ } 
+
+ /**
+  * while there are path that can be pull, pull as many as we can
+  * we only display the most recent one
+ */
+  while(pathProducer.getNumPathsAvailable())
+  {
+    pathProducer.getPath(leftChannelFFTPath);
+  }
+
+
   if (parametersChanged.compareAndSetBool(false, true))
   {
     // update the monochain
     updateChain();
     // set a repaint
-    repaint();
   }
+    repaint();
 }
 
 void ResponseCurveComponent::updateChain()
@@ -252,6 +314,12 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
   {
     responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
   }
+
+g.setColour(Colours::blue);
+g.strokePath(leftChannelFFTPath,PathStrokeType(1.f));
+
+
+
   g.setColour(Colours::orange);
   g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
   g.setColour(Colours::white);
@@ -352,7 +420,7 @@ void ResponseCurveComponent::resized()
 
     str.clear();
     str << (db -24.f);
-    auto textWidth = g.getCurrentFont().getStringWidth(str);
+    textWidth = g.getCurrentFont().getStringWidth(str);
     r.setX(1);
         r.setSize(textWidth, fontHeight);
     g.setColour(Colours::lightgrey);
