@@ -146,6 +146,7 @@ ResponseCurveComponent::ResponseCurveComponent(SimpleEqAudioProcessor &p) : audi
   {
     param->addListener(this);
   }
+  updateChain();
   // dont forget it otherwise s actiove pas
   startTimerHz(60);
 }
@@ -168,6 +169,13 @@ void ResponseCurveComponent::timerCallback()
   if (parametersChanged.compareAndSetBool(false, true))
   {
     // update the monochain
+    updateChain();
+    // set a repaint
+    repaint();
+  }
+}
+
+void ResponseCurveComponent::updateChain(){
     auto chainSettings = getChainSettings(audioProcessor.apvts);
     auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
     updateCoefficients(monoChain.get<ChainPosition::Peak>().coefficients, peakCoefficients);
@@ -176,9 +184,6 @@ void ResponseCurveComponent::timerCallback()
     auto highCutCoefficient = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
     updateCutFilter(monoChain.get<ChainPosition::LowCut>(), lowCutCoefficient, chainSettings.lowCutSlope);
     updateCutFilter(monoChain.get<ChainPosition::HighCut>(), highCutCoefficient, chainSettings.highCutSlope);
-    // set a repaint
-    repaint();
-  }
 }
 
 void ResponseCurveComponent::paint(juce::Graphics &g)
@@ -319,8 +324,11 @@ void SimpleEqAudioProcessorEditor::resized()
   // subcomponents in your editor..
 
   auto bounds = getLocalBounds();
+  float hRatio =25.f/100.f; //Juce_Live_Constant(33) -> Allow us to tweak in real time
   // on enleve un tier pour pouvoir afficher la reponse dedans
-  auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+  auto responseArea = bounds.removeFromTop(bounds.getHeight() * hRatio);
+
+  bounds.removeFromTop(5);
   auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
 
   // on fait la moiter de ce qu'il reste tavu pas 1:3 du total
