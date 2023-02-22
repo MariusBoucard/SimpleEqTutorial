@@ -286,7 +286,7 @@ public:
   using BlockType = juce::AudioBuffer<float>;
   SingleChannelSampleFifo<BlockType> leftChannelFifo {Channel::Left};
   SingleChannelSampleFifo<BlockType> rightChannelFifo{ Channel::Right};
-  
+
 private:
  
   // To use this in stereo, we create 2 instances
@@ -304,6 +304,13 @@ private:
   void updateHighCutFilters(const ChainSettings& chainSettings);
 
   void updateFilter();
+
+  //=====================================================================
+  /**
+   * Lets feed it with test data
+  */
+ juce::dsp::Oscillator<float> osc;
+ 
   //==============================================================================
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SimpleEqAudioProcessor)
 };

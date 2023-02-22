@@ -110,6 +110,11 @@ void SimpleEqAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
 
 leftChannelFifo.prepare(samplesPerBlock);
 rightChannelFifo.prepare(samplesPerBlock);
+//Lambda funciton here
+    osc.initialise([](float x) { return std::sin(x); });
+    spec.numChannels = getTotalNumOutputChannels();
+    osc.prepare(spec);
+    osc.setFrequency(5000);
 }
 
 void SimpleEqAudioProcessor::releaseResources()
@@ -161,9 +166,12 @@ void SimpleEqAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce
         buffer.clear(i, 0, buffer.getNumSamples());
     
     updateFilter();
-
+    //Pour pas entendre ce qui arrive
+    
    juce::dsp::AudioBlock<float> block(buffer);
-
+    //  buffer.clear();
+    // juce::dsp::ProcessContextReplacing<float> stereoContext(block);
+    // osc.process(stereoContext);
    //Then we have to split both of the stereo channels into mono :
    auto leftBlock = block.getSingleChannelBlock(0);
    auto rightBlock = block.getSingleChannelBlock(1);
