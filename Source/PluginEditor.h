@@ -181,6 +181,10 @@ struct LookAndFeel : juce::LookAndFeel_V4
                         float rotaryStartAngle,
                         float rotaryEndAngle,
                         juce::Slider &) override;
+  void drawToggleButton(juce::Graphics &g,
+                         juce::ToggleButton & toggleButton,
+                           bool shouldDrawButtonAsHighlighted,
+                            bool shouldDrawButtonAsDown) override;
 };
 struct RotarySliderWithLabels : juce::Slider
 {
@@ -301,6 +305,8 @@ private:
     ButtonAttachement lowCutBypassButtonAttachement, highCutBypassButtonAttachement,peakBypassButtonAttachement, analyzerEnabledButtonAttachement;
       
         ResponseCurveComponent responseCurveComponent;
+
+        LookAndFeel lnf;
   // MonoChain monoChain;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SimpleEqAudioProcessorEditor)
 };

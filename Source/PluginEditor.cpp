@@ -57,6 +57,46 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g,
     g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
   }
 }
+
+void LookAndFeel::drawToggleButton(juce::Graphics &g,
+                         juce::ToggleButton & toggleButton,
+                           bool shouldDrawButtonAsHighlighted,
+                            bool shouldDrawButtonAsDown)
+{
+using namespace juce;
+
+Path powerButton;
+
+auto bounds = toggleButton.getLocalBounds();
+g.setColour(Colours::red);
+g.drawRect(bounds);
+auto size = jmin(bounds.getWidth(),bounds.getHeight())-6;
+auto r = bounds.withSizeKeepingCentre(size,size).toFloat();
+//Because radiant
+float ang = 30.f;
+
+size -=6;
+powerButton.addCentredArc(r.getCentreX(),
+                          r.getCentreY(),
+                          size*0.5f,
+                          size*0.5,
+                          0.f,
+                          degreesToRadians(ang)
+                          ,degreesToRadians(360.f -ang),
+                          true);  
+
+powerButton.startNewSubPath(r.getCentreX(),r.getY());
+powerButton.lineTo(r.getCentre());
+auto color =toggleButton.getToggleState() ? Colours::dimgrey : Colours::green; 
+g.setColour(color);
+
+PathStrokeType pst(2.f,PathStrokeType::JointStyle::curved) ;
+g.strokePath(powerButton,pst);
+g.drawEllipse(r,2);
+
+}
+
+
 void RotarySliderWithLabels::paint(juce::Graphics &g)
 {
   using namespace juce;
@@ -319,7 +359,7 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
       mag *= highcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
   }
-    mags[i] = Decibels::gainToDecibels(mag);
+    mags[i]  = Decibels::gainToDecibels(mag);
   }
 
   Path responseCurve;
@@ -537,11 +577,19 @@ SimpleEqAudioProcessorEditor::SimpleEqAudioProcessorEditor(SimpleEqAudioProcesso
     addAndMakeVisible(comp);
   }
 
+  peakBypassButton.setLookAndFeel(&lnf);
+  lowCutBypassButton.setLookAndFeel(&lnf);
+  highCutBypassButton.setLookAndFeel(&lnf);
+
   setSize(600, 480);
+
 }
 
 SimpleEqAudioProcessorEditor::~SimpleEqAudioProcessorEditor()
 {
+    peakBypassButton.setLookAndFeel(nullptr);
+  lowCutBypassButton.setLookAndFeel(nullptr);
+  highCutBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
