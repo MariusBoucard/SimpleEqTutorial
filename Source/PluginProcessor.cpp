@@ -248,6 +248,9 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
 
 
+    settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
+    settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")-> load() >0.5f;
+    settings.peakBypassed = apvts.getRawParameterValue("Peak Bypassed")->load() > 0.5f;
     return settings;
 }
 //Never forget to dereference so you can get the value because passed by ref
@@ -259,6 +262,10 @@ void /*SimpleEqAudioProcessor::*/updateCoefficients(Coefficients& old,const Coef
 
     auto cutCoefficient = makeLowCutFilter(chainSettings,getSampleRate());
 // //pourquoi ici on fait une reference ??
+leftChain.setBypassed<ChainPosition::LowCut>(chainSettings.lowCutBypassed);
+
+rightChain.setBypassed<ChainPosition::LowCut>(chainSettings.lowCutBypassed);
+
     auto& leftLowCut = leftChain.get<ChainPosition::LowCut>();
      updateCutFilter(leftLowCut,cutCoefficient,chainSettings.lowCutSlope);
 
@@ -271,6 +278,9 @@ void /*SimpleEqAudioProcessor::*/updateCoefficients(Coefficients& old,const Coef
   auto highCutCoefficient = makeHighCutFilter(chainSettings,getSampleRate());
  auto& leftHighCut = leftChain.get<ChainPosition::HighCut>();
 
+leftChain.setBypassed<ChainPosition::HighCut>(chainSettings.highCutBypassed);
+
+rightChain.setBypassed<ChainPosition::HighCut>(chainSettings.highCutBypassed);
     updateCutFilter(leftHighCut,highCutCoefficient,chainSettings.highCutSlope);
 
 
@@ -299,6 +309,9 @@ void SimpleEqAudioProcessor::updatePeakFilter(const ChainSettings& chainSettings
     //                                                     juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
     //Be carefull with the dereference as it s put on the heap 
     auto peakCoefficients = makePeakFilter(chainSettings,getSampleRate());
+    leftChain.setBypassed<ChainPosition::Peak>(chainSettings.peakBypassed);
+
+rightChain.setBypassed<ChainPosition::Peak>(chainSettings.peakBypassed);
     updateCoefficients(leftChain.get<ChainPosition::Peak>().coefficients,peakCoefficients);
     updateCoefficients(rightChain.get<ChainPosition::Peak>().coefficients,peakCoefficients);
 
@@ -358,6 +371,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEqAudioProcessor::crea
     //Now we're gonna use the choise object use to let user select a subset of values
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope","LowCut Slope",stringArray,0));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope","HighCut Slope",stringArray,0));
+
+    layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed","LowCut Bypass",false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("Peak Bypassed","Peak Bypass",false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed","HighCut Bypass",false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("Analyzer Enabled","Analyzer Enabled",true));
+
+
+
 
     return layout;
 };

@@ -295,7 +295,12 @@ private:
       lowCutSlopeSliderAttachement,
       highCutSlopeSliderAttachement;
 
-  ResponseCurveComponent responseCurveComponent;
+      juce::ToggleButton lowCutBypassButton, highCutBypassButton,peakBypassButton, analyzerEnabledButton;
+
+    using ButtonAttachement = APVTS::ButtonAttachment;
+    ButtonAttachement lowCutBypassButtonAttachement, highCutBypassButtonAttachement,peakBypassButtonAttachement, analyzerEnabledButtonAttachement;
+      
+        ResponseCurveComponent responseCurveComponent;
   // MonoChain monoChain;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SimpleEqAudioProcessorEditor)
 };
