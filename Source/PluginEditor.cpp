@@ -100,17 +100,17 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
         g.setColour(color);
         auto bounds = toggleButton.getLocalBounds();
         g.drawRect(bounds);
-        auto insertRect = bounds.reduced(4);
-        Path randomPath;
-        Random r;
-        randomPath.startNewSubPath(insertRect.getX(),insertRect.getY()+insertRect.getHeight()*r.nextFloat());
+        // auto insertRect = bounds.reduced(4);
+        // Path randomPath;
+        // Random r;
+        // randomPath.startNewSubPath(insertRect.getX(),insertRect.getY()+insertRect.getHeight()*r.nextFloat());
 
-        for(auto x = insertRect.getX()+1 ;x<insertRect.getRight();x+=2){
-                  randomPath.lineTo(x,insertRect.getY()+insertRect.getHeight()*r.nextFloat());
+        // for(auto x = insertRect.getX()+1 ;x<insertRect.getRight();x+=2){
+        //           randomPath.lineTo(x,insertRect.getY()+insertRect.getHeight()*r.nextFloat());
 
-        }
+        // }
 
-        g.strokePath(randomPath,PathStrokeType(1.f));
+        g.strokePath(pb->randomPath,PathStrokeType(1.f));
   }
 }
 
@@ -617,6 +617,8 @@ void SimpleEqAudioProcessorEditor::resized()
   analyzerEnabledArea.setX(5);
   analyzerEnabledArea.removeFromTop(2);
   analyzerEnabledButton.setBounds(analyzerEnabledArea);
+
+  bounds.removeFromTop(5);
   float hRatio = 25.f / 100.f; // Juce_Live_Constant(33) -> Allow us to tweak in real time
   // on enleve un tier pour pouvoir afficher la reponse dedans
   auto responseArea = bounds.removeFromTop(bounds.getHeight() * hRatio);
