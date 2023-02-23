@@ -249,6 +249,11 @@ struct ResponseCurveComponent : juce::Component,
   void paint(juce::Graphics &g) override;
   void updateChain();
   void resized() override;
+
+  void toggleAnalysisEnablement(bool enabled)
+  {
+    shouldShowFFTAnalisis = enabled;
+  }
 private:
   juce::Atomic<bool> parametersChanged{false};
   MonoChain monoChain;
@@ -258,6 +263,7 @@ private:
   juce::Rectangle<int> getAnalysisArea();
 
   PathProducer leftPathProducer,rightPathProducer;
+  bool shouldShowFFTAnalisis = true ;
  };
 
 //==============================================================================
@@ -265,6 +271,7 @@ private:
  * 
  */
 struct PowerButton : juce::ToggleButton { };
+
 struct AnalyzerButton : juce::ToggleButton {
   void resized() override
   {
