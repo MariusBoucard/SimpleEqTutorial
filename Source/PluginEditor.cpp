@@ -53,9 +53,9 @@ auto enabled = slider.isEnabled();
     auto strWidth = g.getCurrentFont().getStringWidth(text);
     r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
     r.setCentre(bounds.getCentre());
-    g.setColour(Colours::black);
+    g.setColour(enabled ? Colours::black : Colours::darkgrey);
     g.fillRect(r);
-    g.setColour(Colours::white);
+    g.setColour(enabled ? Colours::white : Colours::lightgrey);
     g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
   }
 }
@@ -72,8 +72,8 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
     Path powerButton;
 
     auto bounds = toggleButton.getLocalBounds();
-    g.setColour(Colours::red);
-    g.drawRect(bounds);
+    // g.setColour(Colours::red);
+    // g.drawRect(bounds);
     auto size = jmin(bounds.getWidth(), bounds.getHeight()) - 6;
     auto r = bounds.withSizeKeepingCentre(size, size).toFloat();
     // Because radiant
@@ -396,11 +396,11 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
  auto leftChannelFFTPath = leftPathProducer.getPath();
   auto rightChannelFFTPath = rightPathProducer.getPath();
 
-  leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+  leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()-10));
   g.setColour(Colours::skyblue);
   g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
 
-  rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+  rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()-10));
   g.setColour(Colours::yellow);
   g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
   }
