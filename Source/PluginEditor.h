@@ -154,6 +154,7 @@ struct AnalyzerPathGenerator
 
         pathFifo.push(p);
     }
+    
 
     int getNumPathsAvailable() const
     {
